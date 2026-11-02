@@ -11,11 +11,15 @@ export function ZaloInvite({
   message,
   onSent,
   sent,
+  label = "Gửi thiệp qua Zalo",
+  sentLabel = "Đã gửi thiệp",
 }: {
   phone: string | null;
   message: string;
   onSent: () => Promise<void>;
   sent: boolean;
+  label?: string;
+  sentLabel?: string;
 }) {
   const [opened, setOpened] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -40,7 +44,7 @@ export function ZaloInvite({
   if (sent && !opened) {
     return (
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[0.92rem] text-moss">Đã gửi thiệp</span>
+        <span className="text-[0.92rem] text-moss">{sentLabel}</span>
         <button type="button" onClick={open} className="btn-quiet btn-sm">
           Gửi lại
         </button>
@@ -51,12 +55,12 @@ export function ZaloInvite({
   return (
     <div className="space-y-2">
       <button type="button" onClick={open} className="btn-primary w-full">
-        {phone ? "Gửi thiệp qua Zalo" : "Chia sẻ thiệp"}
+        {phone ? label : "Chia sẻ qua ứng dụng khác"}
       </button>
       {opened ? (
         <>
           <p className="text-[0.88rem] text-muted">
-            {copied ? "Lời mời đã được sao chép. Trong Zalo, nhấn giữ ô chat → Dán → Gửi." : "Không sao chép được tự động — chép lời mời bên dưới."}
+            {copied ? "Nội dung đã được sao chép. Trong Zalo, nhấn giữ ô chat → Dán → Gửi." : "Không sao chép được tự động — chép nội dung bên dưới."}
           </p>
           {!copied ? <textarea readOnly value={message} className="field min-h-28 text-[0.9rem]" /> : null}
           <button

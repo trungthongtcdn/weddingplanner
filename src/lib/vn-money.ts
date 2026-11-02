@@ -119,8 +119,6 @@ function parseNumeric(s: string): number {
   return Number(s.replace(",", "."));
 }
 
-const MAGNITUDE_UNITS = new Set<Unit>(["mươi", "trăm", "nghìn", "triệu", "tỷ"]);
-
 /**
  * Tìm đoạn số tiền ở cuối câu.
  * Một chữ số (một, hai, năm…) chỉ được tính là một phần của số tiền khi ngay sau nó là

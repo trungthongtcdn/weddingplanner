@@ -9,6 +9,10 @@ import { formatDateVn } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "Lời mời cùng chuẩn bị" };
 
+function isExpired(at: Date): boolean {
+  return at.getTime() < Date.now();
+}
+
 export default async function InvitePage({ params }: PageProps<"/moi/[token]">) {
   const { token } = await params;
   const user = await requireUser(`/moi/${token}`);
@@ -18,7 +22,7 @@ export default async function InvitePage({ params }: PageProps<"/moi/[token]">) 
     .innerJoin(schema.weddings, eq(schema.memberInvites.weddingId, schema.weddings.id))
     .where(eq(schema.memberInvites.token, token))
     .limit(1);
-  const valid = row && !row.invite.usedAt && row.invite.expiresAt.getTime() > Date.now();
+  const valid = row && !row.invite.usedAt && !isExpired(row.invite.expiresAt);
 
   return (
     <main className="mx-auto max-w-md px-5 pt-[max(2.5rem,env(safe-area-inset-top))] pb-12">

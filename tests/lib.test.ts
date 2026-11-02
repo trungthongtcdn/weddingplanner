@@ -118,3 +118,22 @@ describe("số điện thoại", () => {
     expect(normalizeVnPhone("12345")).toBeNull();
   });
 });
+
+import { guessColumns, extractRows } from "@/lib/statement";
+
+describe("đọc sao kê", () => {
+  it("đoán cột ghi có và nội dung", () => {
+    const rows = [
+      ["NGÂN HÀNG TMCP", "", "", ""],
+      ["Ngày giao dịch", "Ghi nợ", "Ghi có", "Nội dung"],
+      ["15/01/2027", "", "500.000", "NGUYEN VAN HUNG chuyen tien MUNG AB2CD"],
+      ["15/01/2027", "200.000", "", "Thanh toan dien"],
+      ["16/01/2027", "", "1.000.000", "chuc mung hanh phuc"],
+    ];
+    const g = guessColumns(rows);
+    expect(g).toEqual({ headerRow: 1, date: 0, amount: 2, description: 3 });
+    const out = extractRows(rows, g);
+    expect(out).toHaveLength(2);
+    expect(out[0]).toEqual({ date: "15/01/2027", amount: 500000, description: "NGUYEN VAN HUNG chuyen tien MUNG AB2CD" });
+  });
+});
