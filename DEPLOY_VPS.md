@@ -7,54 +7,27 @@ Internet ──443──▶ caddy (dropship) ──▶ app:3000            (shop
                                   └──▶ weddingplanner:3000 (Trăm Năm)
 ```
 
-## Lần đầu
+## Cài hoặc cập nhật bằng một lệnh
 
-Chạy bằng root trên VPS.
+Chạy trên máy Mac (đã đăng nhập GitHub và SSH được vào VPS bằng key). Thay `<IP-VPS>`:
 
 ```bash
-# 0. Kiểm tra chỗ trống: build Next.js cần khoảng 1,5 GB RAM (tính cả swap)
-free -h && df -h / && docker network ls | grep dropship
-
-# Nếu RAM + swap dưới ~2 GB, thêm 2 GB swap (không ảnh hưởng container đang chạy)
-fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
-echo '/swapfile none swap sw 0 0' >> /etc/fstab
-
-# 1. Lấy mã nguồn vào /root/weddingplanner (repo private: dùng deploy key, hoặc đẩy bằng tar từ máy có quyền)
-#    Từ máy Mac:  git -C <thư-mục-weddingplanner> archive --format=tar main | ssh root@<vps> "mkdir -p /root/weddingplanner && tar -x -C /root/weddingplanner"
-
-# 2. Bí mật
-cd /root/weddingplanner
-cat > .env.prod <<EOF2
-SESSION_SECRET=$(openssl rand -hex 32)
-APP_URL=https://<domain-tram-nam>
-# Chưa nối dịch vụ SMS: hiện OTP trên màn hình, chỉ người có mã thử nghiệm mới đăng nhập được
-OTP_DEV_SHOW=1
-PILOT_ACCESS_CODE=$(openssl rand -hex 3 | tr a-f A-F)
-EOF2
-chmod 600 .env.prod && cat .env.prod
-
-# 3. Build và chạy
-docker compose -p weddingplanner -f docker-compose.prod.yml --env-file .env.prod up -d --build
-
-# 4. Thêm domain vào Caddy của dropship (sao lưu trước; dùng >> để giữ nguyên file đang được mount)
-cd /root/shopee-dropship
-cp Caddyfile Caddyfile.bak-$(date +%F-%H%M)
-printf '\n<domain-tram-nam> {\n\treverse_proxy weddingplanner:3000\n}\n' >> Caddyfile
-docker compose -f docker-compose.prod.yml exec caddy caddy reload --config /etc/caddy/Caddyfile
-
-# 5. Kiểm tra
-curl -sI https://<domain-tram-nam> | head -1
-curl -sI https://$(grep ^DOMAIN= .env.prod | cut -d= -f2) | head -1   # dropship vẫn chạy
+VPS=root@<IP-VPS>; rm -rf /tmp/weddingplanner && git clone -q https://github.com/trungthongtcdn/weddingplanner /tmp/weddingplanner && git -C /tmp/weddingplanner archive --format=tar main | ssh "$VPS" 'mkdir -p /root/weddingplanner && tar -x -C /root/weddingplanner && bash /root/weddingplanner/scripts/deploy-vps.sh'
 ```
 
-Chưa có domain riêng thì dùng tạm `<ip-nối-bằng-gạch>.sslip.io` (ví dụ `203-0-113-5.sslip.io`): tên này tự trỏ về IP của VPS, Caddy vẫn lấy được chứng chỉ HTTPS.
+`scripts/deploy-vps.sh` làm lần lượt:
+
+1. Kiểm tra Docker, thư mục `/root/shopee-dropship`, container caddy và tên mạng Docker của dropship.
+2. Nếu RAM + swap dưới 2,5 GB thì thêm 2 GB swap, để bước build không làm hết RAM của dropship.
+3. Lần đầu tạo `.env.prod`: domain tạm `<ip-nối-bằng-gạch>.sslip.io` (tự trỏ về IP VPS, có HTTPS), `SESSION_SECRET`, và mã thử nghiệm `PILOT_ACCESS_CODE`. Muốn dùng domain riêng thì chạy với `WEDDING_DOMAIN=cuoi.example.com` ở lần đầu, hoặc sửa `.env.prod` rồi chạy lại.
+4. Build image và chạy container `weddingplanner` (giới hạn 512 MB RAM), migration tự chạy khi khởi động.
+5. Sao lưu `Caddyfile` của dropship rồi thêm một khối domain, reload Caddy. Nếu Caddy từ chối cấu hình mới, script trả file về như cũ.
+6. Gọi thử cả Trăm Năm lẫn dropship, in địa chỉ và mã thử nghiệm.
 
 ## Cập nhật phiên bản
 
 ```bash
-cd /root/weddingplanner
-# lấy mã mới (git pull nếu dùng deploy key, hoặc đẩy lại bằng tar như bước 1)
-docker compose -p weddingplanner -f docker-compose.prod.yml --env-file .env.prod up -d --build
+# chạy lại đúng lệnh một dòng ở trên — .env.prod và dữ liệu được giữ nguyên
 ```
 
 Migration chạy tự động mỗi lần container khởi động.
