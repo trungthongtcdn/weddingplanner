@@ -5,7 +5,7 @@ import { loginAction, type LoginState } from "@/app/actions/auth";
 import { SubmitButton } from "@/components/submit-button";
 import { formatPhone } from "@/lib/phone";
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, pilot }: { next: string; pilot: boolean }) {
   const [state, action] = useActionState<LoginState, FormData>(loginAction, { step: "phone", next });
 
   if (state.step === "code") {
@@ -73,6 +73,15 @@ export function LoginForm({ next }: { next: string }) {
         />
         <p className="hint">Mã đăng nhập sẽ gửi qua tin nhắn. Không cần mật khẩu.</p>
       </div>
+      {pilot ? (
+        <div>
+          <label htmlFor="pilot" className="label">
+            Mã thử nghiệm
+          </label>
+          <input id="pilot" name="pilot" className="field uppercase" autoComplete="off" required />
+          <p className="hint">Bản thử nghiệm chỉ mở cho người được mời. Hỏi người gửi link để lấy mã.</p>
+        </div>
+      ) : null}
       {state.error ? <p className="text-[0.92rem] font-medium text-son">{state.error}</p> : null}
       <SubmitButton name="intent" value="send" pendingText="Đang gửi mã…">
         Nhận mã đăng nhập

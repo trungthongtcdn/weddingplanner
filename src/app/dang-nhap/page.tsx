@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/dang-nhap"
       <Mark className="h-12 w-12 text-son" />
       <h1 className="mt-6 text-[1.9rem] leading-tight font-bold">Đăng nhập</h1>
       <p className="mt-2 mb-7 text-muted">Dùng số điện thoại của bạn. Bố mẹ và người thân được mời cũng đăng nhập theo cách này.</p>
-      <LoginForm next={next} />
+      <LoginForm next={next} pilot={Boolean(process.env.PILOT_ACCESS_CODE)} />
     </main>
   );
 }

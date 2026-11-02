@@ -1,0 +1,33 @@
+# Chạy Trăm Năm trên cùng VPS với shopee-dropship.
+# Caddy của dropship (đang giữ cổng 80/443) chuyển tiếp domain của Trăm Năm vào container này
+# qua mạng Docker "shopee-dropship_default". Xem DEPLOY_VPS.md.
+services:
+  weddingplanner:
+    build: .
+    image: weddingplanner:latest
+    restart: unless-stopped
+    environment:
+      SESSION_SECRET: ${SESSION_SECRET:?Thiếu SESSION_SECRET trong .env.prod}
+      APP_URL: ${APP_URL:?Thiếu APP_URL trong .env.prod}
+      OTP_WEBHOOK_URL: ${OTP_WEBHOOK_URL:-}
+      OTP_WEBHOOK_TOKEN: ${OTP_WEBHOOK_TOKEN:-}
+      OTP_DEV_SHOW: ${OTP_DEV_SHOW:-}
+      PILOT_ACCESS_CODE: ${PILOT_ACCESS_CODE:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      - wedding_data:/app/data
+    expose:
+      - "3000"
+    mem_limit: 512m
+    networks:
+      dropship:
+        aliases:
+          - weddingplanner
+
+networks:
+  dropship:
+    external: true
+    name: ${DROPSHIP_NETWORK:-shopee-dropship_default}
+
+volumes:
+  wedding_data:
