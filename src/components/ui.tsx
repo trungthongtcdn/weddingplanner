@@ -73,7 +73,7 @@ export function BackLink({ href, children }: { href: string; children: ReactNode
 export function Stat({ value, label }: { value: ReactNode; label: string }) {
   return (
     <div>
-      <div className="text-[1.45rem] leading-tight font-bold tabular-nums">{value}</div>
+      <div className="text-[1.45rem] leading-tight font-bold whitespace-nowrap tabular-nums">{value}</div>
       <div className="text-[0.85rem] text-muted">{label}</div>
     </div>
   );

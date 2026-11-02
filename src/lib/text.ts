@@ -21,6 +21,14 @@ export function tokens(input: string): string[] {
   return n ? n.split(" ") : [];
 }
 
+/** Mỗi từ trong câu tìm phải là đầu của một từ trong chuỗi ("ng v an" khớp "Nguyễn Văn An", "an" không khớp "Hằng"). */
+export function matchesQuery(haystack: string, query: string): boolean {
+  const q = tokens(query);
+  if (!q.length) return true;
+  const h = tokens(haystack);
+  return q.every((t) => h.some((w) => w.startsWith(t)));
+}
+
 /** Lấy tên gọi (chữ cuối) — người Việt thường gọi nhau bằng tên này. */
 export function givenName(fullName: string): string {
   const t = fullName.trim().split(/\s+/);

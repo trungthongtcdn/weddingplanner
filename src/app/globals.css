@@ -70,14 +70,16 @@
   .hint {
     @apply mt-1 text-[0.85rem] text-muted;
   }
-  .btn {
+  .btn,
+  .btn-primary,
+  .btn-quiet {
     @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 font-semibold transition-colors disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-son text-white hover:bg-son-dark active:bg-son-dark;
+    @apply bg-son text-white hover:bg-son-dark active:bg-son-dark;
   }
   .btn-quiet {
-    @apply btn border border-line bg-surface text-ink hover:bg-paper;
+    @apply border border-line bg-surface text-ink hover:bg-paper;
   }
   .btn-sm {
     @apply min-h-10 rounded-lg px-3.5 text-[0.9rem];

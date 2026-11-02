@@ -7,7 +7,7 @@ import { PageTitle, SectionTitle, Empty, Notice } from "@/components/ui";
 import { STATUS_LABEL, CALL_LABEL, estimateAttendance } from "@/lib/guest-status";
 import { findDuplicatePhones } from "@/lib/matching";
 import { formatPhone } from "@/lib/phone";
-import { normalizeForMatch } from "@/lib/text";
+import { matchesQuery } from "@/lib/text";
 import { formatDateTimeVn } from "@/lib/dates";
 import type { GuestStatus, Side } from "@/lib/db/schema";
 
@@ -34,12 +34,11 @@ export default async function GuestsPage({ params, searchParams }: PageProps<"/c
 
   const [all, parties] = await Promise.all([loadGuests(id, sides), loadParties(id)]);
   const dups = findDuplicatePhones(all);
-  const nq = normalizeForMatch(q);
   const list = all.filter(
     (g) =>
       (!sideFilter || g.side === sideFilter) &&
       (!statusFilter || g.status === statusFilter) &&
-      (!nq || normalizeForMatch(`${g.honorific ?? ""} ${g.name} ${g.groupName ?? ""} ${g.phone ?? ""}`).includes(nq)),
+      (!q || matchesQuery(`${g.honorific ?? ""} ${g.name} ${g.groupName ?? ""} ${g.phone ?? ""}`, q)),
   );
   const base = `/cuoi/${id}/khach`;
   const qs = (patch: Record<string, string | null>) => {

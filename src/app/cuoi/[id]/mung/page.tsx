@@ -56,7 +56,7 @@ export default async function LedgerPage({ params, searchParams }: PageProps<"/c
       <PageTitle title="Sổ mừng" sub="Tiền vào thẳng tài khoản của chủ quỹ. Sổ chỉ ghi nhận và đối soát." />
       <FundTabs funds={funds} currentId={fund.id} path={base} />
 
-      <div className="panel grid grid-cols-3 gap-2 px-4 py-4">
+      <div className="panel grid grid-cols-[1.6fr_1fr_1fr] gap-2 px-4 py-4">
         <Stat value={formatVndShort(total)} label={FUND_LABEL[fund.side]} />
         <Stat value={gifts.length} label="Khoản" />
         <Stat value={items} label="Hiện vật" />

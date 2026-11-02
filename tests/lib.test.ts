@@ -137,3 +137,14 @@ describe("đọc sao kê", () => {
     expect(out[0]).toEqual({ date: "15/01/2027", amount: 500000, description: "NGUYEN VAN HUNG chuyen tien MUNG AB2CD" });
   });
 });
+
+import { matchesQuery } from "@/lib/text";
+
+describe("tìm theo từ", () => {
+  it("khớp đầu từ, không khớp giữa từ", () => {
+    expect(matchesQuery("chú Hùng Hàng Xóm", "an")).toBe(false);
+    expect(matchesQuery("Nguyễn Văn An", "an")).toBe(true);
+    expect(matchesQuery("Nguyễn Văn An", "ng v an")).toBe(true);
+    expect(matchesQuery("cô Lan · Họ nội", "ho noi")).toBe(true);
+  });
+});

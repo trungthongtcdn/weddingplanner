@@ -52,7 +52,7 @@ export async function createWedding(input: NewWeddingInput): Promise<string> {
         id: newId(),
         weddingId,
         side,
-        coupleCanView: side !== "CAP_DOI",
+        coupleCanView: false,
       })),
     );
     await tx.insert(schema.parties).values([

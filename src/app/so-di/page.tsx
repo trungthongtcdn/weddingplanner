@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { requireUser } from "@/lib/auth/session";
 import { fundPermission, parentJoinedMap } from "@/lib/access";
-import { PageTitle, SectionTitle, Empty, Notice } from "@/components/ui";
-import { normalizeForMatch } from "@/lib/text";
+import { PageTitle, SectionTitle, Empty, Notice, BackLink } from "@/components/ui";
+import { matchesQuery } from "@/lib/text";
 import { normalizeVnPhone } from "@/lib/phone";
 import { formatVnd } from "@/lib/vn-money";
 import { formatDateVn } from "@/lib/dates";
@@ -28,7 +27,6 @@ export default async function OutgoingPage({ searchParams }: PageProps<"/so-di">
       .from(schema.members)
       .innerJoin(schema.weddings, eq(schema.members.weddingId, schema.weddings.id))
       .where(eq(schema.members.userId, user.id));
-    const nq = normalizeForMatch(q);
     const phone = normalizeVnPhone(q);
     for (const { member, wedding } of memberships) {
       const funds = await db.select().from(schema.funds).where(eq(schema.funds.weddingId, wedding.id));
@@ -41,8 +39,7 @@ export default async function OutgoingPage({ searchParams }: PageProps<"/so-di">
         .innerJoin(schema.guests, eq(schema.gifts.guestId, schema.guests.id))
         .where(inArray(schema.gifts.fundId, visible));
       for (const r of rows) {
-        const hay = normalizeForMatch(`${r.guest.honorific ?? ""} ${r.guest.name}`);
-        if ((phone && r.guest.phone === phone) || (nq && hay.includes(nq))) {
+        if ((phone && r.guest.phone === phone) || (!phone && matchesQuery(`${r.guest.honorific ?? ""} ${r.guest.name}`, q))) {
           received.push({
             name: `${r.guest.honorific ? r.guest.honorific + " " : ""}${r.guest.name}`,
             amount: r.gift.amount,
@@ -55,14 +52,11 @@ export default async function OutgoingPage({ searchParams }: PageProps<"/so-di">
     }
     received = received.slice(0, 20);
   }
-  const nq = normalizeForMatch(q);
-  const myToThem = q ? entries.filter((e) => normalizeForMatch(e.personName).includes(nq)) : [];
+  const myToThem = q ? entries.filter((e) => matchesQuery(e.personName, q)) : [];
 
   return (
     <main className="mx-auto max-w-lg px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-14">
-      <Link href="/" className="mb-3 inline-flex min-h-10 items-center text-[0.95rem] font-medium text-son">
-        ← Đám cưới của bạn
-      </Link>
+      <BackLink href="/">Đám cưới của bạn</BackLink>
       <PageTitle title="Sổ đi" sub="Ghi lại những khoản bạn đã mừng người khác, và tra xem ai từng mừng mình." />
 
       <form className="panel space-y-2 px-4 py-4" action="/so-di">

@@ -37,15 +37,20 @@ export function StatementImport({ weddingId, fundId }: { weddingId: string; fund
   return (
     <div className="space-y-4">
       <div className="panel px-4 py-4">
-        <label className="label" htmlFor="file">
-          File sao kê tài khoản nhận mừng
+        <p className="label">File sao kê tài khoản nhận mừng</p>
+        <label htmlFor="file" className="btn-quiet w-full cursor-pointer">
+          Chọn file sao kê (.xlsx, .csv)
         </label>
         <input
           id="file"
           type="file"
           accept=".xlsx,.csv"
-          onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
-          className="block w-full text-[0.93rem] file:mr-3 file:rounded-lg file:border-0 file:bg-son-tint file:px-3.5 file:py-2.5 file:font-semibold file:text-son-dark"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            e.target.value = ""; // cho phép chọn lại cùng một file
+            if (f) onFile(f);
+          }}
+          className="sr-only"
         />
         <p className="hint">Tải sao kê dạng Excel (.xlsx) hoặc .csv từ ứng dụng ngân hàng. File chỉ được đọc để lấy các khoản tiền vào, không được lưu lại.</p>
         {loading ? <p className="mt-2 text-muted">Đang đọc file…</p> : null}
