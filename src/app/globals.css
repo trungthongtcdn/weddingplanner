@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+/*
+ * Bảng màu lấy cảm hứng từ sơn mài và thiệp cưới truyền thống:
+ * đỏ son cho hành động chính, vàng kim chỉ dùng cho đường viền và điểm nhấn trên thiệp,
+ * nền giấy hơi hồng thay vì trắng lạnh.
+ */
+@theme {
+  --color-paper: #f7f2f0;
+  --color-surface: #ffffff;
+  --color-ink: #2b1a17;
+  --color-muted: #6f5f59;
+  --color-line: #e6dad4;
+  --color-son: #a3201b;
+  --color-son-dark: #7c1611;
+  --color-son-tint: #f6e4e1;
+  --color-kim: #b5892f;
+  --color-kim-tint: #f5ecd9;
+  --color-moss: #36654a;
+  --color-moss-tint: #e3efe6;
+  --color-amber: #9a5e0c;
+  --color-amber-tint: #fbefd9;
+
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 14px;
+}
+
+@layer base {
+  html {
+    font-size: 17px;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-son) 55%, transparent);
+    outline-offset: 2px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 1rem; /* tránh iOS tự phóng to khi chạm vào ô nhập */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .field {
+    @apply block w-full rounded-xl border border-line bg-surface px-3.5 py-3 text-ink placeholder:text-muted/70;
+  }
+  .field:focus {
+    @apply border-son outline-none ring-2 ring-son/20;
+  }
+  .label {
+    @apply mb-1.5 block text-[0.9rem] font-medium text-ink;
+  }
+  .hint {
+    @apply mt-1 text-[0.85rem] text-muted;
+  }
+  .btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 font-semibold transition-colors disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-son text-white hover:bg-son-dark active:bg-son-dark;
+  }
+  .btn-quiet {
+    @apply btn border border-line bg-surface text-ink hover:bg-paper;
+  }
+  .btn-sm {
+    @apply min-h-10 rounded-lg px-3.5 text-[0.9rem];
+  }
+  .panel {
+    @apply rounded-[var(--radius-card)] border border-line bg-surface;
+  }
+  .rows > * + * {
+    @apply border-t border-line;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[0.8rem] font-medium;
+  }
+}
