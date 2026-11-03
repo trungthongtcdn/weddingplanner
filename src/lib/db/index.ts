@@ -1,17 +1,37 @@
 import "server-only";
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+import { createClient, type Client } from "@libsql/client";
+import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 
-const url = process.env.DATABASE_URL ?? "file:./data/tram-nam.db";
+type Db = LibSQLDatabase<typeof schema>;
 
-const globalForDb = globalThis as unknown as { __tramNamClient?: ReturnType<typeof createClient> };
+const globalForDb = globalThis as unknown as { __tramNamClient?: Client; __tramNamDb?: Db };
 
-const client =
-  globalForDb.__tramNamClient ??
-  createClient({ url, authToken: process.env.DATABASE_AUTH_TOKEN || undefined });
+/**
+ * Mở kết nối khi có truy vấn đầu tiên, không mở lúc import:
+ * bước `next build` nạp các module này để thu thập cấu hình trang, lúc đó chưa có thư mục dữ liệu.
+ */
+function getDb(): Db {
+  if (globalForDb.__tramNamDb) return globalForDb.__tramNamDb;
+  const url = process.env.DATABASE_URL || "file:./data/tram-nam.db";
+  if (url.startsWith("file:")) {
+    const path = url.slice("file:".length);
+    if (path && path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
+  }
+  const client = globalForDb.__tramNamClient ?? createClient({ url, authToken: process.env.DATABASE_AUTH_TOKEN || undefined });
+  globalForDb.__tramNamClient = client;
+  globalForDb.__tramNamDb = drizzle(client, { schema });
+  return globalForDb.__tramNamDb;
+}
 
-if (process.env.NODE_ENV !== "production") globalForDb.__tramNamClient = client;
+export const db = new Proxy({} as Db, {
+  get(_target, prop) {
+    const real = getDb();
+    const value = Reflect.get(real, prop, real);
+    return typeof value === "function" ? value.bind(real) : value;
+  },
+});
 
-export const db = drizzle(client, { schema });
 export { schema };
